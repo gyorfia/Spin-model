@@ -6,7 +6,7 @@ class Graphics:
         """
         N by N grid
         """
-        # Create grid coordinates
+        '''# Create grid coordinates
         self.X, self.Y = np.meshgrid(np.arange(N), np.arange(N))
         # Define the arrow directions: (0, +1) for spin up, (0, -1) for spin down
         self.U = np.zeros((N, N))  # X-component of arrow is 0 (no horizontal movement)
@@ -23,9 +23,14 @@ class Graphics:
     def UpdateModel(self, spinMat):
         self.quiver.set_UVC(self.U, spinMat) # Update the quiver with new U and V components
         plt.draw()
-        plt.pause(0.1)
+        plt.pause(0.0001)
 
-    def FinalPlot(self):
+    def FinalPlot(self, spinMat):
         print("Final plot\n")
+        self.quiver.set_UVC(self.U, spinMat)
         plt.ioff()
+        plt.show()'''
+
+    def Plot(self, xs, ys):
+        plt.plot(xs, ys, color="blue")
         plt.show()
