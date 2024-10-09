@@ -2,11 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Graphics:
+    '''
     def __init__(self, N):
-        """
-        N by N grid
-        """
-        '''# Create grid coordinates
+        #N by N grid
+        # Create grid coordinates
         self.X, self.Y = np.meshgrid(np.arange(N), np.arange(N))
         # Define the arrow directions: (0, +1) for spin up, (0, -1) for spin down
         self.U = np.zeros((N, N))  # X-component of arrow is 0 (no horizontal movement)
@@ -29,8 +28,15 @@ class Graphics:
         print("Final plot\n")
         self.quiver.set_UVC(self.U, spinMat)
         plt.ioff()
-        plt.show()'''
+        plt.show()
+    '''
+        
+    #def Plot(self, xs, ys):
+        #plt.plot(xs, ys, color="blue")
+        #plt.show()
 
-    def Plot(self, xs, ys):
-        plt.plot(xs, ys, color="blue")
+    def Black_White(self, spinMat, iteration):
+        plt.imshow(spinMat, cmap='gray')
+        plt.title(f"Iteration: {iteration}")
+        plt.axis('off')  # Turn off axes for clarity
         plt.show()
