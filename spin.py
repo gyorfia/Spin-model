@@ -7,7 +7,8 @@ N = 500
 J = -1
 iteration=0
 k=math.pow(N,2.179)
-gfx = gfx.Graphics()
+# Change figure dimension in constructor: Graphics(nRows, nColumns)
+gfx = gfx.Graphics(1, 2)
 spinMat = np.random.choice([-1, 1], size=(N, N))
 flips = 0
 seed = 1234
@@ -25,5 +26,10 @@ while(iteration <k): # how many loops on the whole grid
             spinMat[i][j] *= -1
             flips +=1
         iteration +=1
-        print(iteration)
+        print(100*iteration/k)
 gfx.Black_White(spinMat, iteration)
+# demonstration plot
+xs = np.linspace(0, 2*np.pi, 1000)
+gfx.Plot(xs, np.sin(xs), "Sine function")
+#
+gfx.Show() # <-> plt.show()
