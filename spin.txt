@@ -1,0 +1,64 @@
+import Graphics as gfx
+import numpy as np
+from numpy import log
+import math
+
+#INIT
+N = 500
+J = -1
+iteration=0
+k=math.pow(N,2.179)
+# Change figure dimension in constructor: Graphics(nRows, nColumns)
+gfx = gfx.Graphics(1, 2)
+spinMat = np.random.choice([-1, 1], size=(N, N))
+flips = 0
+seed = 1234
+np.random.seed(seed)
+rng1=np.random.default_rng(seed)
+tc=2/(np.log(1+np.sqrt(2)))
+#LOGIC
+'''
+while(iteration <k): # how many loops on the whole grid
+        i=rng1.integers(0,N)
+        j=rng1.integers(0,N)
+        E1 = J*spinMat[i][j]*(spinMat[i-1][j] + spinMat[(i+1)%N][j] + spinMat[i][j-1] + spinMat[i][(j+1)%N])
+        E2 = J*(-1)*spinMat[i][j]*(spinMat[i-1][j] + spinMat[(i+1)%N][j] + spinMat[i][j-1] + spinMat[i][(j+1)%N]) # energy if flipped
+        factor=np.exp((-(E2-E1))/tc)
+        if(E2-E1 <0 or factor> rng1.random()):
+            spinMat[i][j] *= -1
+            flips +=1
+        iteration +=1
+        print(100*iteration/k)
+np.save('fractal.npy', spinMat)
+'''
+load_spinMat=np.load('fractal.npy')
+#calculating fractal dimension
+NNN=[]
+eps_values=[100,50,25,10,5,3, 2] #length of boxes
+for eps in eps_values:
+    NN=0 #the boxes where there are -1s and 1s
+    y=0
+    box_count =0 #how many box covers the lattice
+    while(N-y>eps):
+        x=0
+        while(N-x>eps):
+            box=load_spinMat[x:x+eps, y:y+eps]
+            
+            box_e_sum=np.sum(box)#the product of the elements of the box
+            if(box_e_sum!=eps**2 or box_e_sum!=-(eps**2)):
+                NN+=1    
+            x+=eps
+            box_count+=1
+        y+=eps
+        NNN.append(NN)
+    D=log(NN)/log(eps)
+    print(D)
+gfx.Plot(log(NN),log(eps), "The linear line")
+            
+
+gfx.Black_White(load_spinMat, iteration)
+# demonstration plot
+#xs = np.linspace(0, 2*np.pi, 1000)
+#gfx.Plot(xs, np.sin(xs), "Sine function")
+#
+gfx.Show() # <-> plt.show()
