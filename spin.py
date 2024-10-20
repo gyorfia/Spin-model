@@ -2,6 +2,16 @@ import Graphics as gfx
 import numpy as np
 import math
 
+def BoxIsFilled(spinMat, i0, i1, j0, j1):
+    '''
+    (spinMat, starting row, ending row (incl.), starting column, ending column (incl.),)
+    '''
+    for i in range(i0, i1+1):
+        for j in range(j0, j1+1):
+            if(spinMat[i][j] == -1):
+                return True
+    return False
+
 #INIT
 N = 500
 J = -1
@@ -26,10 +36,26 @@ while(iteration <k): # how many loops on the whole grid
             spinMat[i][j] *= -1
             flips +=1
         iteration +=1
-        print(100*iteration/k)
+        print(f"Generating spinMat: {(100*iteration/k):.0f}%")
+eps = 10 # first length of the box
+n = N//eps # first size of the box-grid
+xs = []
+ys = []
+while eps >= 2: # last length of the box
+    nBox = 0
+    for i in range(n):
+        for j in range(n):
+            if(BoxIsFilled(spinMat, eps*i, eps*(i+1)-1 if i != n-1 else N-1, eps*j, eps*(j+1)-1 if j != n-1 else N-1)):
+                nBox += 1
+    ys.append(math.log(nBox))
+    xs.append(-math.log(eps))
+    print(f"Current box size: {eps}")
+    eps -= 1
+    n = N//eps if eps!=0 else 0
+
+# Plotting
 gfx.Black_White(spinMat, iteration)
-# demonstration plot
-xs = np.linspace(0, 2*np.pi, 1000)
-gfx.Plot(xs, np.sin(xs), "Sine function")
-#
+lastI = len(xs)-1
+dimension = (ys[lastI]-ys[0])/(xs[lastI]-xs[0]) # slope
+gfx.Plot(xs, ys, f"Dimension: {dimension}", "-log(epsilon)", "log(N(epsilon))", True)
 gfx.Show() # <-> plt.show()
