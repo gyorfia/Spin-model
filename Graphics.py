@@ -53,6 +53,10 @@ class Graphics:
         plt.draw()
 
     def Black_White(self, spinMat, iteration):
+        '''
+        -1 -> black
+        1 -> white
+        '''
         ax = self.__GetAx()
         ax.axis('on')
         ax.imshow(spinMat, cmap='gray')
@@ -60,9 +64,9 @@ class Graphics:
         plt.draw()
         self.nAxes += 1
         
-    def Plot(self, xs, ys, title="Plot", xaxis="x" ,yaxis="y"):
+    def Plot(self, xs, ys, title="Plot", xaxis="x" ,yaxis="y", invert_x_axis=False):
         '''
-        xs, ys, title="Plot", xaxis="x" ,yaxis="y"
+        xs, ys, title="Plot", xaxis="x" ,yaxis="y", invert_x_axis=False
         '''
         ax = self.__GetAx()
         ax.set_aspect('auto')
@@ -70,6 +74,8 @@ class Graphics:
         ax.set_title(title)
         ax.set_xlabel(xaxis)
         ax.set_ylabel(yaxis)
+        if(invert_x_axis):
+            ax.invert_xaxis()
         ax.axis('on')
         ax.grid(True)
         self.nAxes += 1
