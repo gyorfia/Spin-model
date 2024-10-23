@@ -1,22 +1,22 @@
 import Graphics as gfx
 import numpy as np
-import math
+from sklearn.linear_model import LinearRegression
 
 def BoxIsFilled(spinMat, i0, i1, j0, j1):
     '''
     (spinMat, starting row, ending row (incl.), starting column, ending column (incl.),)
     '''
-    for i in range(i0, i1+1):
-        for j in range(j0, j1+1):
-            if(spinMat[i][j] == -1):
-                return True
-    return False
+    submatrix = spinMat[i0:i1+1, j0:j1+1]
 
-#INIT
-N = 500
+    if np.all(submatrix == 1) or np.all(submatrix == -1):
+        return False
+    return True
+
+# INIT
+N = int(2**8)
 J = -1
 iteration=0
-k=math.pow(N,2.179)
+k=np.pow(N,2.8) # k=np.pow(N,2.179)
 # Change figure dimension in constructor: Graphics(nRows, nColumns)
 gfx = gfx.Graphics(1, 2)
 spinMat = np.random.choice([-1, 1], size=(N, N))
@@ -25,7 +25,8 @@ seed = 1234
 np.random.seed(seed)
 rng1=np.random.default_rng(seed)
 tc=2/(np.log(1+np.sqrt(2)))
-#LOGIC
+
+# SPINMAT CALCULATIONS
 while(iteration <k): # how many loops on the whole grid
         i=rng1.integers(0,N)
         j=rng1.integers(0,N)
@@ -37,25 +38,32 @@ while(iteration <k): # how many loops on the whole grid
             flips +=1
         iteration +=1
         print(f"Generating spinMat: {(100*iteration/k):.0f}%")
-eps = 10 # first length of the box
+
+# DIMENSION COUNTING
+eps = N # first length of the box
 n = N//eps # first size of the box-grid
-xs = []
-ys = []
+xs_list = []
+ys_list = []
 while eps >= 2: # last length of the box
     nBox = 0
     for i in range(n):
         for j in range(n):
             if(BoxIsFilled(spinMat, eps*i, eps*(i+1)-1 if i != n-1 else N-1, eps*j, eps*(j+1)-1 if j != n-1 else N-1)):
                 nBox += 1
-    ys.append(math.log(nBox))
-    xs.append(-math.log(eps))
+    ys_list.append(np.log(nBox))
+    xs_list.append(np.log(eps))
     print(f"Current box size: {eps}")
-    eps -= 1
+    eps = int(eps/2)
     n = N//eps if eps!=0 else 0
 
-# Plotting
-gfx.Black_White(spinMat, iteration)
-lastI = len(xs)-1
-dimension = (ys[lastI]-ys[0])/(xs[lastI]-xs[0]) # slope
-gfx.Plot(xs, ys, f"Dimension: {dimension}", "-log(epsilon)", "log(N(epsilon))", True)
+# PLOTTING
+xs = np.array(xs_list)
+ys = np.array(ys_list)
+gfx.Black_White(spinMat, N)
+dimension = (ys[len(xs)-1]-ys[0])/(xs[len(xs)-1]-xs[0])
+model = LinearRegression().fit(xs.reshape((-1, 1)), ys)
+gfx.Plot(xs, model.predict(xs.reshape((-1, 1))), f"Dimension: {abs(model.coef_)}", "log(epsilon)", "log(N(epsilon))", False)
+gfx.Scatter_Current(xs, ys)
+print(f"\nModel function: f(x)= {model.intercept_:0.2f} + {model.coef_[0]:0.2f}x")
+print(f"Coefficient of determination: {model.score(xs.reshape(-1, 1), ys.reshape(-1, 1)):0.4f}")
 gfx.Show() # <-> plt.show()

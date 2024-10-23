@@ -15,7 +15,7 @@ class Graphics:
             for j in range(columns):
                 self.ax[i][j].axis("off")
         plt.subplots_adjust(wspace=0.3, hspace=0.3)
-        self.nAxes = 0
+        self.nAxes = -1
 
     def __GetAx(self):
         '''
@@ -28,6 +28,7 @@ class Graphics:
         N
         Only one per Graphics object
         '''
+        self.nAxes += 1
         ax = self.__GetAx()
         ax.axis('on')
         # N by N grid
@@ -42,7 +43,6 @@ class Graphics:
         ax.set_aspect('equal')  # Ensure square grid
         ax.set_xticks([]) # Remove x-ticks for cleaner look
         ax.set_yticks([])  # Remove y-ticks for cleaner look
-        self.nAxes += 1
 
     def UpdateArrows(self, spinMat):
         '''
@@ -52,22 +52,25 @@ class Graphics:
         self.quiver.set_UVC(self.U, spinMat) # Update the quiver with new U and V components
         plt.draw()
 
-    def Black_White(self, spinMat, iteration):
+    def Black_White(self, spinMat, size):
         '''
         -1 -> black
         1 -> white
         '''
+        self.nAxes += 1
         ax = self.__GetAx()
         ax.axis('on')
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
         ax.imshow(spinMat, cmap='gray')
-        ax.set_title(f"Iteration: {iteration}")
+        ax.set_title(f"N= {size}")
         plt.draw()
-        self.nAxes += 1
         
     def Plot(self, xs, ys, title="Plot", xaxis="x" ,yaxis="y", invert_x_axis=False):
         '''
         xs, ys, title="Plot", xaxis="x" ,yaxis="y", invert_x_axis=False
         '''
+        self.nAxes += 1
         ax = self.__GetAx()
         ax.set_aspect('auto')
         ax.plot(xs, ys, color='blue')
@@ -78,9 +81,13 @@ class Graphics:
             ax.invert_xaxis()
         ax.axis('on')
         ax.grid(True)
-        self.nAxes += 1
+        plt.draw()
+
+    def Scatter_Current(self, xs, ys):
+        ax = self.__GetAx()
+        ax.scatter(xs, ys, color='red', s=3)
         plt.draw()
 
     def Show(self):
-        # plt.ioff()
+        plt.ioff()
         plt.show()
