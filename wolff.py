@@ -54,7 +54,7 @@ def create_cluster(spinMat, i,j, t, rng1_fn):
 
     return np.array(sorted(cluster_fn, key=lambda x:(x[0], x[1])))
 
-#the boundary spins of a cluster
+#the boundary spins of a cluster, not in use
 def cluster_boundary(cluster, N):
     cluster_set=set(tuple(spin) for spin in cluster)
     c_boundary=[]
@@ -68,7 +68,7 @@ def cluster_boundary(cluster, N):
     c_boundary=np.array(c_boundary)
     return c_boundary
 
-#The neigboring spins of a cluster
+#The neigboring spins of a cluster not in use
 def cluster_neighbors(cluster,N):
     c_neighbors=[]
 
@@ -82,11 +82,11 @@ def cluster_neighbors(cluster,N):
     c_neighbors=np.array(c_neighbors)
     return c_neighbors
 
-#flips the cluster
+#flips the cluster, not in use (Wrong)
 def flip_cluster(spinMat, cluster, N, rng1_fn, t):
     J=-1
     c_boundary=cluster_boundary(cluster, N)
-
+ 
     E1_cluster=0
     E2_cluster=0
     d_E=0
@@ -109,7 +109,7 @@ def flip_cluster(spinMat, cluster, N, rng1_fn, t):
 
 
     return  spinMat
-
+#flips the entire cluster
 def flip_c(spinMat, cluster, N):
     for i, j in cluster:
         spinMat[i][j]*=-1
