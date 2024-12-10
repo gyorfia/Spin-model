@@ -63,7 +63,7 @@ def create_cluster(spinMat, i,j, t, rng1_fn, N):
 
     return cluster, energy_dif
 
-#grow an allready created cluster
+#grow an already created cluster
 def grow_cluster(spinMat, cluster, N, t, rng1_fn):
     energy_dif=0
     new_spins=[]
@@ -89,7 +89,6 @@ def grow_cluster(spinMat, cluster, N, t, rng1_fn):
 def flip_cluster(spinMat, cluster, N, rng1_fn, t, energy_dif):
     J=-1
     
-    
     if energy_dif<0 or np.exp(-energy_dif/t)>(rng1_fn.random()):
         for (i, j) in cluster:
             spinMat[i][j]*=-1
@@ -100,10 +99,11 @@ def flip_cluster(spinMat, cluster, N, rng1_fn, t, energy_dif):
 
 def Wolff(spinMat, N, k, t, rng1_fn, flips=0):
     energy_dif=0
-    cluster_list=[]
-    visited_clusters = set()
+    #cluster_list=[]
+    #visited_clusters = set()
 
-    for it in tqdm(range(int(k)), desc="Wolff"):
+    #for it in tqdm(range(int(k)), desc="Wolff"):
+    for it in range(int(k)):
         i = rng1_fn.integers(0, N)
         j = rng1_fn.integers(0, N)
     
@@ -136,9 +136,7 @@ def BoxIsFilled(spinMat, i0, i1, j0, j1):
     (spinMat, starting row, ending row (incl.), starting column, ending column (incl.))
     '''
     submatrix = spinMat[i0:i1+1, j0:j1+1]
-    sum_submatrix=np.sum(submatrix)
-    #print(f"Sum of absolute values: {sum_submatrix}, Expected: {(i1 - i0 + 1) * (j1 - j0 + 1)}") 
-    if sum_submatrix>=(i1-i0+1)*(j1-j0+1) or sum_submatrix<=-(i1-i0+1)*(j1-j0+1)  :
+    if np.all(submatrix == 1) or np.all(submatrix == -1):
         return False
     return True
 
@@ -174,43 +172,67 @@ def magnetization(spinMat):
     return np.sum(spinMat)/np.size(spinMat)
 
 # INIT
-N = 10
+N = 256
 J = -1
 iteration = 0
-k = 10* int(np.pow(N, 4))  # originally: k=np.pow(N,2.179)
-# Change figure dimension in constructor: Graphics(nRows, nColumns)
-gfx = gfx.Graphics(2, 2)
+k = 10* int(np.pow(N, 2))  # originally: k=np.pow(N,2.179)
+gfx = gfx.Graphics(2, 2) # Change figure dimension in constructor: Graphics(nRows, nColumns)
 spinMat = np.random.choice([-1, 1], size=(N, N))
 spinMat_metropolis=np.copy(spinMat)
 spinMat_wolff=np.copy(spinMat)
 
-flips = 0
-flips_metropolis=flips
-flips_wolff=flips
+flips_metropolis=0
+flips_wolff=0
 
 M_metropolis=0
 magnetization_metropolis=[]
 M_wolff=0
 magnetization_wolff=[]
 
-t=np.linspace(1.5,3.5,50)
+#t=np.linspace(1.5,3.5,50)
 
 seed = 1234
 np.random.seed(seed)
 rng1 = np.random.default_rng(seed)
 tc = 2 / (np.log(1 + np.sqrt(2)))
-t=0.5
+#t=0.5
+t = tc
+k = 100
 
-# SPINMAT CALCULATIONS t:
+# Convergence init
+initial_magnetization = magnetization(spinMat_wolff)
+nSample = 1000
+avgSample = 1
+avgPrevSample = 2
+flip_counts = []
+magnetizations = []
 
-spinMat_wolff, flips_wolff=Wolff(spinMat,N, k, t, rng1, flips=0)
+# SPINMAT CALCULATIONS:
+
+while abs(avgSample - avgPrevSample)/avgPrevSample > 0.001:
+    avgPrevSample = avgSample
+    avgSample = 0
+    for i in range(nSample):
+        spinMat_wolff, flips_wolff = Wolff(spinMat_wolff, N, k, t, rng1, flips_wolff)
+        new_magnetization = magnetization(spinMat_wolff)
+        # For plotting
+        flip_counts.append(flips_wolff)
+        magnetizations.append(new_magnetization)
+        initial_magnetization = new_magnetization # Update the magnetization for the next iteration
+        avgSample += new_magnetization
+    avgSample /= nSample
+    print(f"Change in magnetization: {abs(avgSample - avgPrevSample)/avgPrevSample:.4f}")
+    
+# Display the final spin matrix
 gfx.Black_White(spinMat_wolff, N)
 
-plt.show()
+# Plot magnetization as a function of flips
+gfx.Plot(flip_counts, magnetizations, title="Magnetization vs Flips", xaxis="Number of Flips", yaxis="Magnetization")
+gfx.Show()
 
 '''
 for t_v in t:
-    spinMat_metropolis, flips_metropolis= Metropolis(spinMat,N,k, t_v, rng1, flips=0)
+    spinMat_metropolis, flips_metropolis= Metropolis(spinMat_metropolis,N,k, t_v, rng1, flips=0)
     magnetization_metropolis.append(magnetization(spinMat_metropolis))
     print (magnetization(spinMat_metropolis))
 gfx.Black_White(spinMat_metropolis, N)
@@ -220,7 +242,7 @@ plt.ylabel("M [A/m^2]")
 plt.legend()
 
 for t_v in t:
-    spinMat_wolff, flips_wolff=Wolff(spinMat,N, k, t_v, rng1, flips=0)
+    spinMat_wolff, flips_wolff=Wolff(spinMat_wolff,N, k, t_v, rng1, flips=0)
     magnetization_wolff.append(spinMat_wolff)
     print (magnetization(spinMat_wolff))
 gfx.Black_White(spinMat_wolff, N)
